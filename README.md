@@ -1,16 +1,17 @@
-# timetable
+# Keeping this as refference and notes
 
-A new Flutter project.
+Uri parsing seems unneccessary and could likely be handeled with few hardcoded uri extensions:
+'default.aspx', 'login.aspx', 'showtimetable.aspx'
+Will return to it once I'm able to request at least 1 timetable.
+This may cuase some underlying problems thus it will be left out till after. 
+Current solution although tedious works sufficently.
 
-## Getting Started
+When reworking a simple 'entry' url to redirect to current timetable url: 'timetable.ait.ie/2223'
+Keeping this combined with hardcoded extensions should work best.
 
-This project is a starting point for a Flutter application.
+## Step 3
+This is an oddone as it requires redirects but http does not follow redirects (302) on POST.
+To resolve this, POST is used for obtaining cookies and url (default.aspx). Then followed by GET request.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
