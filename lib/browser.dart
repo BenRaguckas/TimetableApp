@@ -3,70 +3,78 @@ import 'package:html/parser.dart' as html;
 
 class TimetableBrowser {
   final _client = http.Client();
-  // final _cookieTimeout = 0;
-  String _cookies = "";
-  var _body = <String, String>{};
   final String _originUri;
-  String targetUri = "";
 
-  //  Empty constructor
-  TimetableBrowser(this._originUri);
+  final String loginUri, defaultUri, showUri;
 
-  //  Step 1
-  //  Get timetable url
-  Future<bool> getInitialUrl() async {
-    var response = await _client.get(Uri.parse(_originUri));
-    if (response.statusCode == 200) {
-      var doc = html.parse(response.body);
-      String content = doc.getElementsByTagName('meta').first.attributes['content'].toString();
-      var re = RegExp("'(.*?)'"); //  Isolate element in single quotes
-      _setTargetUri(re.firstMatch(content)!.group(1).toString());
-    } else {
-      throw Exception("getInitialUrl return != 200");
-    }
-    return true;
+  //  Constructor
+  TimetableBrowser(this._originUri, {this.loginUri = 'login.aspx', this.defaultUri = 'default.aspx', this.showUri = 'showtimetable.aspx'});
+
+  //  First request used to retrieve the base URI used for timetable
+  Future<String> _getBaseUrl() async {
+    // var response = await _client.get(Uri.parse(_originUri));
+    var response = await _getRequest(_originUri);
+    var doc = html.parse(response.body);
+    String content = doc.getElementsByTagName('meta').first.attributes['content'].toString();
+    var re = RegExp("'(.*?)'"); //  Isolate element in single quotes
+    String uri = re.firstMatch(content)!.group(1).toString();
+    if (uri[uri.length - 1] != '/') uri += '/';
+    return uri;
   }
 
-  //  Step 2
-  //  Gets login form and from it form details (for submit) and target url.
-  Future<bool> getLoginForm() async {
-    var response = await _client.get(Uri.parse(targetUri));
-    if (response.statusCode == 200) {
-      _body = _getFormInputs(response, submitId: 'bGuestLogin');
-      var doc = html.parse(response.body);
-      _setTargetUri(doc.getElementsByTagName('form').first.attributes['action'].toString());
+  //  Base method for getRequest that captures 200 response code
+  Future<http.Response> _getRequest(String uri, {String? cookies}) async {
+    http.Response response;
+    if (cookies == null) {
+      response = await _client.get(Uri.parse(uri));
     } else {
-      throw Exception("getLoginForm return != 200");
+      response = await _client.get(Uri.parse(uri), headers: {'cookie': cookies});
     }
-    return true;
+    if (response.statusCode == 200) {
+      return response;
+    } else {
+      throw Exception("Get request for '$uri' had status code NOT 200.");
+    }
   }
 
-  //  Step 3
-  //  Submit login and get cookies
-  Future<bool> submitLoginForm() async {
-    //  Post request for redirect url and cookies
-    var response = await _client.post(Uri.parse(targetUri), body: _body);
+  //  Base method for postRequest without return capture
+  Future<http.Response> _postRequest(String uri, {Map<String, String>? body}) async {
+    http.Response response;
+    if (body != null) {
+      response = await _client.post(Uri.parse(uri), body: body);
+    } else {
+      response = await _client.post(Uri.parse(uri));
+    }
+    return response;
+  }
+
+  //  Method for getting login form details utilizing loginUri
+  Future<Map<String, String>> _getLoginForm(String uri) async {
+    var response = await _getRequest(uri);
+    return _getFormInputs(response, submitId: 'bGuestLogin');
+  }
+
+  //  Method for posting login form to get Cookies utilizing loginUri
+  Future<String> _postLoginForm(String uri, Map<String, String> body) async {
+    var response = await _postRequest(uri, body: body);
     if (response.statusCode == 302) {
-      _setTargetUri(response.headers['location'], fromOrigin: true);
-      if (response.headers.containsKey('set-cookie')) {
-        _cookies = response.headers['set-cookie']!.replaceAll('path=/;', '').replaceAll('HttpOnly', '').replaceAll(',', '');
-      }
+      return response.headers['set-cookie']!.replaceAll('path=/;', '').replaceAll('HttpOnly', '').replaceAll(',', '');
     } else {
-      throw Exception("submitLoginForm return != 302");
+      throw Exception("Redirect did not occur for POST to '$uri'");
     }
-    response = await _client.get(Uri.parse(targetUri), headers: {'cookie': _cookies});
-    response.headers.forEach((key, value) {
-      print("$key: $value");
-    });
+  }
 
-    // var request = http.Request("Get", Uri.parse(uri));
-    // request.followRedirects = true;
-    // request.bodyFields = _body;
-    // var response = await request.send();
-    // response.request?.headers.forEach((key, value) {
-    //   print("$key: $value");
-    // });
+  Future<http.Response> _getDefaultPage(String uri, String cookies) async {
+    var response = await _getRequest(uri, cookies: cookies);
+    return response;
+  }
 
+  Future<bool> testMethod() async {
+    String baseUri = await _getBaseUrl();
+    Map<String, String> body = await _getLoginForm(baseUri + loginUri);
+    String cookies = await _postLoginForm(baseUri + loginUri, body);
+    var response = await _getDefaultPage(baseUri + defaultUri, cookies);
+    //  student_timetable step from postman next!
     return true;
   }
 
@@ -85,37 +93,6 @@ class TimetableBrowser {
         }
       }
     });
-    // if (kDebugMode) {
-    //   print('Gathered form variables.');
-    //   formInputs.forEach((key, value) {
-    //     // ignore: avoid_print
-    //     print("$key: $value");
-    //   });
-    // }
     return formInputs;
-  }
-
-  //  Some basic checks to ensure '/' is placed correctly
-  void _setTargetUri(String? ext, {bool fromOrigin = false}) {
-    ext ??= "/";
-    if (ext.contains(_originUri)) {
-      targetUri = ext;
-    } else {
-      //  Which base to use
-      String uri = "";
-      if (fromOrigin) {
-        uri = _originUri;
-      } else {
-        uri = targetUri;
-      }
-      //
-      if (uri[uri.length - 1] != '/' && ext[0] != '/') {
-        uri += '/';
-      } else if (uri[uri.length - 1] == '/' && ext[0] == '/') {
-        uri = uri.substring(0, uri.length - 1);
-      }
-      uri += ext;
-      targetUri = uri;
-    }
   }
 }
