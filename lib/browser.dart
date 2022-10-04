@@ -38,9 +38,11 @@ class TimetableBrowser {
   }
 
   //  Base method for postRequest without return capture
-  Future<http.Response> _postRequest(String uri, {Map<String, String>? body}) async {
+  Future<http.Response> _postRequest(String uri, {Map<String, String>? body, String? cookies}) async {
     http.Response response;
-    if (body != null) {
+    if (cookies != null && body != null) {
+      response = await _client.post(Uri.parse(uri), body: body, headers: {'cookie': cookies});
+    } else if (body != null) {
       response = await _client.post(Uri.parse(uri), body: body);
     } else {
       response = await _client.post(Uri.parse(uri));
@@ -64,17 +66,37 @@ class TimetableBrowser {
     }
   }
 
-  Future<http.Response> _getDefaultPage(String uri, String cookies) async {
+  Future<Map<String, String>> _getDefaultPage(String uri, String cookies) async {
     var response = await _getRequest(uri, cookies: cookies);
-    return response;
+    Map<String, String> formInputs = _getFormInputs(response);
+    formInputs['__EVENTTARGET'] = 'LinkBtn_StudentSetByName';
+    return formInputs;
+  }
+
+  Future<Map<String, Map<String, String>>> _getTableOptions(String uri, Map<String, String> body, String cookies) async {
+    var response = await _postRequest(uri, body: body, cookies: cookies);
+    var doc = html.parse(response.body);
+    Map<String, Map<String, String>> options = {};
+    //  Gather dlObject (used to get subject code);
+    Map<String, String> dlObject = {};
+    doc.getElementById('dlObject')?.getElementsByTagName('option').forEach((element) {
+      dlObject[element.attributes['value'].toString()] = element.text;
+    });
+    options['dlObject'] = dlObject;
+
+    return options;
   }
 
   Future<bool> testMethod() async {
     String baseUri = await _getBaseUrl();
-    Map<String, String> body = await _getLoginForm(baseUri + loginUri);
-    String cookies = await _postLoginForm(baseUri + loginUri, body);
-    var response = await _getDefaultPage(baseUri + defaultUri, cookies);
-    //  student_timetable step from postman next!
+    Map<String, String> loginBody = await _getLoginForm(baseUri + loginUri);
+    String cookies = await _postLoginForm(baseUri + loginUri, loginBody);
+    Map<String, String> defaultBody = await _getDefaultPage(baseUri + defaultUri, cookies);
+
+    // var response = await _postRequest(baseUri + defaultUri, body: defaultBody, cookies: cookies);
+    var item = await _getTableOptions(baseUri + defaultUri, defaultBody, cookies);
+
+    //  querry_timetable followed by show_timetable
     return true;
   }
 
