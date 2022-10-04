@@ -1,3 +1,5 @@
+import 'package:html/dom.dart';
+import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 
@@ -69,6 +71,7 @@ class TimetableBrowser {
   Future<Map<String, String>> _getDefaultPage(String uri, String cookies) async {
     var response = await _getRequest(uri, cookies: cookies);
     Map<String, String> formInputs = _getFormInputs(response);
+    //  HARDCODED to specify what link to click
     formInputs['__EVENTTARGET'] = 'LinkBtn_StudentSetByName';
     return formInputs;
   }
@@ -78,11 +81,19 @@ class TimetableBrowser {
     var doc = html.parse(response.body);
     Map<String, Map<String, String>> options = {};
     //  Gather dlObject (used to get subject code);
-    Map<String, String> dlObject = {};
-    doc.getElementById('dlObject')?.getElementsByTagName('option').forEach((element) {
-      dlObject[element.attributes['value'].toString()] = element.text;
-    });
-    options['dlObject'] = dlObject;
+    options['dlObject'] = _getSelectOptions(doc, 'dlObject');
+    //  Gather dlFilter2 options (to filter by department)
+    options['dlFilter2'] = _getSelectOptions(doc, 'dlFilter2');
+    //  Gather lbWeeks (target weeks)
+    options['lbWeeks'] = _getSelectOptions(doc, 'lbWeeks');
+    //  Gather lbDays (dunno)
+    options['lbDays'] = _getSelectOptions(doc, 'lbDays');
+    //  Gather dlPeriod
+    options['dlPeriod'] = _getSelectOptions(doc, 'dlPeriod');
+
+    //  Get form inputs
+    Map<String, String> test = _getFormInputs(response, submitId: 'bGetTimetable');
+    options['extra'] = test;
 
     return options;
   }
@@ -96,8 +107,64 @@ class TimetableBrowser {
     // var response = await _postRequest(baseUri + defaultUri, body: defaultBody, cookies: cookies);
     var item = await _getTableOptions(baseUri + defaultUri, defaultBody, cookies);
 
-    //  querry_timetable followed by show_timetable
+    //  TEST
+    Map<String, String> submitBody = item['extra']!;
+    item.forEach((key, value) {
+      if (key != 'extra') {
+        submitBody[key] = value.keys.first;
+      }
+    });
+    submitBody['RadioType'] = 'TextSpreadsheet;swsurl;student+set+textspreadsheet';
+    submitBody.forEach((key, value) {
+      print("$key: ${value.substring(0, math.min(value.length, 50))}");
+    });
+
+    //  submit for timetable
+    var response = await _postRequest(baseUri + defaultUri, body: submitBody, cookies: cookies);
+    print(response.headers['content-length']);
+
+    //  get for timetable
+    var timetableresponse = await _getRequest(baseUri + showUri, cookies: cookies);
+    print(timetableresponse.headers['content-length']);
+
+    _parseTable(timetableresponse);
+    // print(timetableresponse.body);
     return true;
+  }
+
+  //  PLACEHOLDER
+  void _parseTable(http.Response response) {
+    var doc = html.parse(response.body);
+    //  Table header
+    // print("TABLE Print: " + doc.getElementsByTagName('table').first.text.trim());
+    doc.getElementsByTagName('body > table').asMap().forEach((key, value) {
+      //  Catch first table (heading)
+      if (key == 0) {
+        print(value.text.trim());
+      } else if (value.attributes['border'] == '1') {
+        //  Iterate through consecutive table_rows
+        print("DAY $key");
+        value.getElementsByTagName('tr').asMap().forEach((key, value) {
+          //  Skip headers
+          String classOutput = '';
+          if (key != 0) {
+            value.getElementsByTagName('td').forEach((element) {
+              classOutput += element.text + ' | ';
+            });
+          }
+          print(classOutput);
+        });
+      }
+    });
+  }
+
+  //  Maps options of given element by ID
+  Map<String, String> _getSelectOptions(Document doc, String elID) {
+    Map<String, String> optionsMap = {};
+    doc.getElementById(elID)?.getElementsByTagName('option').forEach((element) {
+      optionsMap[element.attributes['value'].toString()] = element.text;
+    });
+    return optionsMap;
   }
 
   //  Gets form inputs
@@ -108,7 +175,7 @@ class TimetableBrowser {
       //  Check if a value exists (null / empty)
       if (element.attributes['value'] != null && element.attributes['value']!.isNotEmpty) {
         //  Check if it is submit input
-        if (element.attributes['type'].toString() != 'submit') {
+        if (element.attributes['type'].toString() == 'hidden') {
           formInputs[element.attributes['id'].toString()] = element.attributes['value']!;
         } else if (element.attributes['id'].toString() == submitId) {
           formInputs[element.attributes['id'].toString()] = element.attributes['value']!;
