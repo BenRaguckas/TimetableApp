@@ -1,10 +1,10 @@
 import 'package:quiver/core.dart';
 
-class Subject {
-  String title, module, type, staff, weeks;
+class Subject implements Comparable<Subject> {
+  String title, module, type, weeks;
   TimeSlot start, finish, duration;
   Room room;
-  List<String> groups;
+  List<String> groups, staff;
 
   Subject(this.title, this.module, this.type, this.start, this.finish, this.duration, this.weeks, this.room, this.staff, this.groups);
   Subject.fromList(List<String> list)
@@ -16,8 +16,24 @@ class Subject {
         duration = TimeSlot.fromString(list[5].trim()),
         weeks = list[6].trim(),
         room = Room.fromSingle(list[7].trim()),
-        staff = list[8].trim(),
-        groups = list[9].split(',');
+        staff = list[8].split(';'),
+        groups = list[9].split(';');
+
+  @override
+  String toString() {
+    return '${title.padLeft(35)}, $module, ${type.padLeft(8)}, $start - $finish, ${room.toString().padLeft(3)}, $staff';
+  }
+
+  @override
+  int compareTo(Subject other) {
+    if (start < other.start || finish < other.finish) {
+      return -1;
+    } else if (start > other.start) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
 
 class Room {
@@ -52,6 +68,10 @@ class TimeSlot {
 
   bool operator >(TimeSlot b) => hour > b.hour || (hour == b.hour && min > b.min);
 
+  bool operator <=(TimeSlot b) => hour < b.hour || (hour == b.hour && min < b.min) || this == b;
+
+  bool operator >=(TimeSlot b) => hour > b.hour || (hour == b.hour && min > b.min) || this == b;
+
   @override
   bool operator ==(Object other) => other is TimeSlot && hour == other.hour && min == other.min;
 
@@ -62,6 +82,6 @@ class TimeSlot {
 
   @override
   String toString() {
-    return '$hour:$min';
+    return '${hour.toString().padLeft(2, "0")}:${min.toString().padLeft(2, "0")}';
   }
 }

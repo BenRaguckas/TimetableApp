@@ -2,6 +2,8 @@ import 'package:html/dom.dart';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
+import 'package:timetable/subject.dart';
+import 'package:timetable/timetable.dart';
 
 class TimetableBrowser {
   final _client = http.Client();
@@ -135,27 +137,35 @@ class TimetableBrowser {
   //  PLACEHOLDER
   void _parseTable(http.Response response) {
     var doc = html.parse(response.body);
-    //  Table header
-    // print("TABLE Print: " + doc.getElementsByTagName('table').first.text.trim());
+    List<List<Subject>> allSubjects = [];
+    String title = '';
+    //  Catch every Body > table element (root elements to avoid table nestingness present)
     doc.getElementsByTagName('body > table').asMap().forEach((key, value) {
       //  Catch first table (heading)
       if (key == 0) {
-        print(value.text.trim());
-      } else if (value.attributes['border'] == '1') {
+        title = value.text.split(' ').first;
+        // print(value.text.trim());
+      } //  All the following tables with borders (should only be weekdays)
+      else if (value.attributes['border'] == '1') {
+        List<Subject> subjects = [];
         //  Iterate through consecutive table_rows
-        print("DAY $key");
         value.getElementsByTagName('tr').asMap().forEach((key, value) {
           //  Skip headers
-          String classOutput = '';
           if (key != 0) {
+            List<String> inputs = [];
             value.getElementsByTagName('td').forEach((element) {
-              classOutput += element.text + ' | ';
+              inputs.add(element.text);
             });
+            subjects.add(Subject.fromList(inputs));
           }
-          print(classOutput);
         });
+        subjects.sort();
+        allSubjects.add(subjects);
       }
     });
+    TimeTable tb = TimeTable(title, allSubjects);
+
+    print(tb);
   }
 
   //  Maps options of given element by ID
