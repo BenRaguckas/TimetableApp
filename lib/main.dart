@@ -149,10 +149,14 @@ class _TimetableAppState extends State<TimetableApp> {
     );
   }
 
-  Future<List<TableOptionsItem>> getOptionList(String target, filter) async {
+  Future<List<TableOptionsItem>> getOptionList(String target, String filter) async {
     Map<String, List<TableOptionsItem>> options = await tb.getTableOptions();
     if (options[target] != null) {
-      return options[target]!;
+      List<TableOptionsItem> item = options[target]!;
+      if (filter.isNotEmpty) {
+        return item.where((element) => element.name.toLowerCase().contains(filter)).toList();
+      }
+      return item;
     }
     return [];
   }
