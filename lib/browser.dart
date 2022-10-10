@@ -2,17 +2,39 @@ import 'package:html/dom.dart';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
+import 'package:quiver/core.dart';
 import 'package:timetable/subject.dart';
 import 'package:timetable/timetable.dart';
 
 class TimetableBrowser {
+  //  HTTP client
   final _client = http.Client();
+  //  Uri used as a starting point (timetable.ait.ie)
   final String _originUri;
-
+  //  Uri extensions (set as default)
   final String loginUri, defaultUri, showUri;
+
+  //  baseUri
+  late String _baseUri;
+
+  //  Objects used for
+  Map<String, List<TableOptionsItem>>? _tableOptions;
+  late Map<String, String> _postBody;
+  late String _cookies;
+  int _cookiesTime = 0;
 
   //  Constructor
   TimetableBrowser(this._originUri, {this.loginUri = 'login.aspx', this.defaultUri = 'default.aspx', this.showUri = 'showtimetable.aspx'});
+
+  //  Get method for _tableOptions (querries if unavailable)
+  Future<Map<String, List<TableOptionsItem>>> getTableOptions() async {
+    if (_tableOptions != null && _cookiesTime + 600000 > DateTime.now().millisecondsSinceEpoch) {
+      return _tableOptions!;
+    } else {
+      await _updateTableOptions();
+      return _tableOptions!;
+    }
+  }
 
   //  First request used to retrieve the base URI used for timetable
   Future<String> _getBaseUrl() async {
@@ -78,10 +100,10 @@ class TimetableBrowser {
     return formInputs;
   }
 
-  Future<Map<String, Map<String, String>>> _getTableOptions(String uri, Map<String, String> body, String cookies) async {
+  Future<Map<String, List<TableOptionsItem>>> _getTableOptions(String uri, Map<String, String> body, String cookies) async {
     var response = await _postRequest(uri, body: body, cookies: cookies);
     var doc = html.parse(response.body);
-    Map<String, Map<String, String>> options = {};
+    Map<String, List<TableOptionsItem>> options = {};
     //  Gather dlObject (used to get subject code);
     options['dlObject'] = _getSelectOptions(doc, 'dlObject');
     //  Gather dlFilter2 options (to filter by department)
@@ -93,44 +115,47 @@ class TimetableBrowser {
     //  Gather dlPeriod
     options['dlPeriod'] = _getSelectOptions(doc, 'dlPeriod');
 
-    //  Get form inputs
-    Map<String, String> test = _getFormInputs(response, submitId: 'bGetTimetable');
-    options['extra'] = test;
+    //  Save form inputs
+    _postBody = _getFormInputs(response, submitId: 'bGetTimetable');
 
     return options;
   }
 
-  Future<bool> testMethod() async {
-    String baseUri = await _getBaseUrl();
-    Map<String, String> loginBody = await _getLoginForm(baseUri + loginUri);
-    String cookies = await _postLoginForm(baseUri + loginUri, loginBody);
-    Map<String, String> defaultBody = await _getDefaultPage(baseUri + defaultUri, cookies);
+  Future<bool> _updateTableOptions() async {
+    //  Get baseUri (redirect from origin url)
+    _baseUri = await _getBaseUrl();
 
-    // var response = await _postRequest(baseUri + defaultUri, body: defaultBody, cookies: cookies);
-    var item = await _getTableOptions(baseUri + defaultUri, defaultBody, cookies);
+    //  get login body
+    _postBody = await _getLoginForm(_baseUri + loginUri);
 
-    //  TEST
-    Map<String, String> submitBody = item['extra']!;
-    item.forEach((key, value) {
-      if (key != 'extra') {
-        submitBody[key] = value.keys.first;
-      }
-    });
-    submitBody['RadioType'] = 'TextSpreadsheet;swsurl;student+set+textspreadsheet';
-    submitBody.forEach((key, value) {
-      print("$key: ${value.substring(0, math.min(value.length, 50))}");
-    });
+    //  Get cookies using _postBody
+    _cookies = await _postLoginForm(_baseUri + loginUri, _postBody);
+    //  Save timestamp
+    _cookiesTime = DateTime.now().millisecondsSinceEpoch;
 
-    //  submit for timetable
-    var response = await _postRequest(baseUri + defaultUri, body: submitBody, cookies: cookies);
+    //  Get default page (redudant page that redirects to table selection)
+    _postBody = await _getDefaultPage(_baseUri + defaultUri, _cookies);
+
+    //  Get _tableOptions
+    _tableOptions = await _getTableOptions(_baseUri + defaultUri, _postBody, _cookies);
+    //  ! Table options updates _postBody
+
+    return true;
+  }
+
+  //  Querry timetable
+  Future<bool> querryTimetable(Map<String, String> params) async {
+    //  Add extra hardcoded variables (only one style of timetable available)
+    _postBody['RadioType'] = 'TextSpreadsheet;swsurl;student+set+textspreadsheet';
+    var response = await _postRequest(_baseUri + defaultUri, body: _postBody, cookies: _cookies);
     print(response.headers['content-length']);
 
     //  get for timetable
-    var timetableresponse = await _getRequest(baseUri + showUri, cookies: cookies);
+    var timetableresponse = await _getRequest(_baseUri + showUri, cookies: _cookies);
     print(timetableresponse.headers['content-length']);
 
     _parseTable(timetableresponse);
-    // print(timetableresponse.body);
+
     return true;
   }
 
@@ -169,10 +194,10 @@ class TimetableBrowser {
   }
 
   //  Maps options of given element by ID
-  Map<String, String> _getSelectOptions(Document doc, String elID) {
-    Map<String, String> optionsMap = {};
+  List<TableOptionsItem> _getSelectOptions(Document doc, String elID) {
+    List<TableOptionsItem> optionsMap = [];
     doc.getElementById(elID)?.getElementsByTagName('option').forEach((element) {
-      optionsMap[element.attributes['value'].toString()] = element.text;
+      optionsMap.add(TableOptionsItem(element.attributes['value'].toString(), element.text)); //[element.attributes['value'].toString()] = element.text;
     });
     return optionsMap;
   }
@@ -194,4 +219,20 @@ class TimetableBrowser {
     });
     return formInputs;
   }
+}
+
+class TableOptionsItem {
+  final String id;
+  final String name;
+
+  TableOptionsItem(this.id, this.name);
+
+  @override
+  bool operator ==(Object other) => other is TableOptionsItem && id == other.id;
+
+  @override
+  int get hashCode => hash2(id.hashCode, name.hashCode);
+
+  @override
+  String toString() => name;
 }
