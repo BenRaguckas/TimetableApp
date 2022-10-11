@@ -28,7 +28,7 @@ class Subject implements Comparable<Subject> {
   int compareTo(Subject other) {
     if (start < other.start || finish < other.finish) {
       return -1;
-    } else if (start > other.start) {
+    } else if (start > other.start || finish > other.finish) {
       return 1;
     } else {
       return 0;
