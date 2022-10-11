@@ -6,8 +6,6 @@ import 'browser.dart';
 
 const List<String> list = ['1', '2', '3', '4'];
 
-final _userEditTextController = TextEditingController(text: 'Mrs');
-
 void main() {
   runApp(const TimetableApp());
 }
@@ -20,6 +18,8 @@ class TimetableApp extends StatefulWidget {
 }
 
 class _TimetableAppState extends State<TimetableApp> {
+  final _formKey = GlobalKey<FormState>();
+
   TimetableBrowser tb = TimetableBrowser('https://timetable.ait.ie/');
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,94 @@ class _TimetableAppState extends State<TimetableApp> {
         backgroundColor: Colors.amber,
         title: const Text("TimetableApp"),
       ),
+      body: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
+            //  Item 1 - dlOptions
+            const Padding(padding: EdgeInsets.all(8)),
+            const Text("dlOptions"),
+            const Divider(),
+            Row(
+              children: const [
+                Expanded(
+                  //  dlOptions dropdown
+                  child: Text('selection'),
+                )
+              ],
+            ),
+            //  Item 2 - dlFilter2
+            const Padding(padding: EdgeInsets.all(8)),
+            const Text("dlFilter2"),
+            const Divider(),
+            Row(
+              children: const [
+                Expanded(
+                  //  dlOptions dropdown
+                  child: Text('selection'),
+                )
+              ],
+            ),
+            //  Item 3 - lbWeeks
+            const Padding(padding: EdgeInsets.all(8)),
+            const Text("lbWeeks"),
+            const Divider(),
+            Row(
+              children: const [
+                Expanded(
+                  //  dlOptions dropdown
+                  child: Text('selection'),
+                )
+              ],
+            ),
+            //  Item 4 - lbDays
+            const Padding(padding: EdgeInsets.all(8)),
+            const Text("lbDays"),
+            const Divider(),
+            Row(
+              children: const [
+                Expanded(
+                  //  dlOptions dropdown
+                  child: Text('selection'),
+                )
+              ],
+            ),
+            //  Item 5 - lbDays
+            const Padding(padding: EdgeInsets.all(8)),
+            const Text("dlPeriod"),
+            const Divider(),
+            Row(
+              children: const [
+                Expanded(
+                  //  dlOptions dropdown
+                  child: Text('selection'),
+                )
+              ],
+            ),
+            //  Item 6 - Submit
+            const Padding(padding: EdgeInsets.all(8)),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Validate returns true if the form is valid, or false otherwise.
+                  if (_formKey.currentState!.validate()) {
+                    // If the form is valid, display a snackbar. In the real world,
+                    // you'd often call a server or save the information in a database.
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Processing Data')),
+                    );
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            )
+          ])),
+      //  T
+
+      //  T
+
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () async {
       //     if (await tb.testMethod())
@@ -77,24 +165,25 @@ class _TimetableAppState extends State<TimetableApp> {
       //   ),
       // ),
       //  end
-      body: Center(
-        child: DropdownSearch<TableOptionsItem>(
-          asyncItems: (filter) => getOptionList('dlObject', filter),
-          compareFn: (i, s) => i == s,
-          popupProps: PopupPropsMultiSelection.modalBottomSheet(
-            isFilterOnline: true,
-            showSelectedItems: true,
-            showSearchBox: true,
-            itemBuilder: _tableOptionBuilder,
-            favoriteItemProps: FavoriteItemProps(
-              showFavoriteItems: true,
-              favoriteItems: (us) {
-                return us.where((e) => e.name.contains("AL_KCLOU_8_4")).toList();
-              },
-            ),
-          ),
-        ),
-      ),
+      //  WORKS
+      // body: Center(
+      //   child: DropdownSearch<TableOptionsItem>(
+      //     asyncItems: (filter) => getOptionList('dlObject', filter),
+      //     compareFn: (i, s) => i == s,
+      //     popupProps: PopupPropsMultiSelection.modalBottomSheet(
+      //       isFilterOnline: true,
+      //       showSelectedItems: true,
+      //       showSearchBox: true,
+      //       itemBuilder: _tableOptionBuilder,
+      //       favoriteItemProps: FavoriteItemProps(
+      //         showFavoriteItems: true,
+      //         favoriteItems: (us) {
+      //           return us.where((e) => e.name.contains("AL_KCLOU_8_4")).toList();
+      //         },
+      //       ),
+      //     ),
+      //   ),
+      // ),
     ));
   }
 
@@ -129,7 +218,7 @@ class _TimetableAppState extends State<TimetableApp> {
     bool isSelected,
   ) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: !isSelected
           ? null
           : BoxDecoration(
@@ -141,7 +230,7 @@ class _TimetableAppState extends State<TimetableApp> {
         selected: isSelected,
         title: Text(item?.name ?? ''),
         subtitle: Text(item?.createdAt?.toString() ?? ''),
-        leading: CircleAvatar(
+        leading: const CircleAvatar(
             // this does not work - throws 404 error
             // backgroundImage: NetworkImage(item.avatar ?? ''),
             ),
