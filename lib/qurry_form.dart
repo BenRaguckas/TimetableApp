@@ -6,6 +6,12 @@ class QuerryForm {
   final _formKey = GlobalKey<FormState>();
   final TimetableBrowser tb = TimetableBrowser('https://timetable.ait.ie/');
 
+  late Map<String, List<TableOptionsItem>> _options;
+
+  QuerryForm() {
+    _updateOptions();
+  }
+
   //  Try making async builder and include defaults
 
   Future<Form> querryForm(BuildContext context) async {
@@ -22,7 +28,8 @@ class QuerryForm {
             Expanded(
               //  dlOptions dropdown (subject selection)
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (filter) => getOptionList('dlObject', filter),
+                // asyncItems: (filter) => _getOptionList('dlObject', filter),
+                asyncItems: (filter) => _getOptions('dlObject', filter),
                 compareFn: (i, s) => i == s,
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   isFilterOnline: true,
@@ -49,7 +56,7 @@ class QuerryForm {
             Expanded(
               //  dlFilter2 dropdown  (Needs tweaking to accomodate or drop)
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => getOptionList('dlFilter2', filter),
+                asyncItems: (String? filter) => _getOptionList('dlFilter2', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
@@ -76,14 +83,14 @@ class QuerryForm {
             Expanded(
               //  lbWeeks dropdown
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => getOptionList('lbWeeks', filter),
+                asyncItems: (String? filter) => _getOptionList('lbWeeks', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
                   showSearchBox: true,
                 ),
                 compareFn: (i, s) => i == s,
-                selectedItem: (await getOptionList('lbWeeks', null)).first,
+                selectedItem: (await _getOptions('lbWeeks', null)).first,
                 // dropdownDecoratorProps: DropDownDecoratorProps(
                 //   dropdownSearchDecoration: InputDecoration(
                 //     labelText: 'User *',
@@ -104,7 +111,7 @@ class QuerryForm {
             Expanded(
               //  lbDays dropdown
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => getOptionList('lbDays', filter),
+                asyncItems: (String? filter) => _getOptionList('lbDays', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
@@ -131,7 +138,7 @@ class QuerryForm {
             Expanded(
               //  dlPeriod dropdown
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => getOptionList('dlPeriod', filter),
+                asyncItems: (String? filter) => _getOptionList('dlPeriod', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
@@ -200,7 +207,7 @@ class QuerryForm {
   }
 
   //  options retriver
-  Future<List<TableOptionsItem>> getOptionList(String target, String? filter) async {
+  Future<List<TableOptionsItem>> _getOptionList(String target, String? filter) async {
     Map<String, List<TableOptionsItem>> options = await tb.getTableOptions();
     if (options[target] != null) {
       List<TableOptionsItem> item = options[target]!;
@@ -210,5 +217,22 @@ class QuerryForm {
       return item;
     }
     return [];
+  }
+
+  // Future<Map<String, List<TableOptionsItem>>> _getAllOptions() async {
+  //   return tb.getTableOptions();
+  // }
+
+  void _updateOptions() async {
+    _options = await tb.getTableOptions();
+  }
+
+  Future<List<TableOptionsItem>> _getOptions(String target, String? filter) async {
+    // _options ??= await _getAllOptions();
+    List<TableOptionsItem> itemList = _options[target]!;
+    if (filter != null && filter.isNotEmpty) {
+      return itemList.where((element) => element.name.toLowerCase().contains(filter.toLowerCase())).toList();
+    }
+    return itemList;
   }
 }
