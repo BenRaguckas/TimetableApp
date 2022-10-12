@@ -18,11 +18,10 @@ class TimetableApp extends StatefulWidget {
 }
 
 class _TimetableAppState extends State<TimetableApp> {
-  final _formKey = GlobalKey<FormState>();
-
   // TimetableBrowser tb = TimetableBrowser('https://timetable.ait.ie/');
+  // QuerryForm qf = await QuerryForm.create();
 
-  QuerryForm qf = QuerryForm();
+  final _messangerKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,7 @@ class _TimetableAppState extends State<TimetableApp> {
           title: const Text("TimetableApp"),
         ),
         body: FutureBuilder<Form>(
-            future: qf.querryForm(context),
+            future: QuerryForm.create().then((value) => value.querryForm(context)),
             builder: (context, snapshot) {
               //  Loading screen instead of Container
               if (!snapshot.hasData) {

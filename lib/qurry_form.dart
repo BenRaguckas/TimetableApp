@@ -4,12 +4,17 @@ import 'browser.dart';
 
 class QuerryForm {
   final _formKey = GlobalKey<FormState>();
-  final TimetableBrowser tb = TimetableBrowser('https://timetable.ait.ie/');
 
-  late Map<String, List<TableOptionsItem>> _options;
+  final Map<String, List<TableOptionsItem>> _options;
 
-  QuerryForm() {
-    _updateOptions();
+  final _messangerKey = GlobalKey<ScaffoldMessengerState>();
+  //  Base consturctor
+  QuerryForm(this._options);
+  //  Actual constructor
+  static Future<QuerryForm> create() async {
+    TimetableBrowser tb = TimetableBrowser('https://timetable.ait.ie/');
+    var options = await tb.getTableOptions();
+    return QuerryForm(options);
   }
 
   //  Try making async builder and include defaults
@@ -19,7 +24,34 @@ class QuerryForm {
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
-        //  Item 1 - dlOptions
+        //  Item 1 - dlFilter2
+        // const Padding(padding: EdgeInsets.all(8)),
+        // const Text("dlFilter2"),
+        // const Divider(),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       //  dlFilter2 dropdown  (Needs tweaking to accomodate or drop)
+        //       child: DropdownSearch<TableOptionsItem>(
+        //         asyncItems: (String? filter) => _getOptionList('dlFilter2', filter),
+        //         popupProps: PopupPropsMultiSelection.modalBottomSheet(
+        //           showSelectedItems: true,
+        //           itemBuilder: _tableOptionBuilder,
+        //           showSearchBox: true,
+        //         ),
+        //         compareFn: (i, s) => i == s,
+        //         dropdownDecoratorProps: DropDownDecoratorProps(
+        //           dropdownSearchDecoration: InputDecoration(
+        //             labelText: 'User *',
+        //             filled: true,
+        //             fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+        //           ),
+        //         ),
+        //       ),
+        //     )
+        //   ],
+        // ),
+        //  Item 2 - dlOptions
         const Padding(padding: EdgeInsets.all(8)),
         const Text("dlOptions"),
         const Divider(),
@@ -31,6 +63,11 @@ class QuerryForm {
                 // asyncItems: (filter) => _getOptionList('dlObject', filter),
                 asyncItems: (filter) => _getOptions('dlObject', filter),
                 compareFn: (i, s) => i == s,
+                autoValidateMode: AutovalidateMode.onUserInteraction,
+                validator: ((value) {
+                  if (value == null) return 'required Field';
+                  return null;
+                }),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   isFilterOnline: true,
                   showSelectedItems: true,
@@ -47,33 +84,6 @@ class QuerryForm {
             )
           ],
         ),
-        //  Item 2 - dlFilter2
-        const Padding(padding: EdgeInsets.all(8)),
-        const Text("dlFilter2"),
-        const Divider(),
-        Row(
-          children: [
-            Expanded(
-              //  dlFilter2 dropdown  (Needs tweaking to accomodate or drop)
-              child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => _getOptionList('dlFilter2', filter),
-                popupProps: PopupPropsMultiSelection.modalBottomSheet(
-                  showSelectedItems: true,
-                  itemBuilder: _tableOptionBuilder,
-                  showSearchBox: true,
-                ),
-                compareFn: (i, s) => i == s,
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'User *',
-                    filled: true,
-                    fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
         //  Item 3 - lbWeeks
         const Padding(padding: EdgeInsets.all(8)),
         const Text("lbWeeks"),
@@ -83,7 +93,7 @@ class QuerryForm {
             Expanded(
               //  lbWeeks dropdown
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => _getOptionList('lbWeeks', filter),
+                asyncItems: (String? filter) => _getOptions('lbWeeks', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
@@ -91,13 +101,6 @@ class QuerryForm {
                 ),
                 compareFn: (i, s) => i == s,
                 selectedItem: (await _getOptions('lbWeeks', null)).first,
-                // dropdownDecoratorProps: DropDownDecoratorProps(
-                //   dropdownSearchDecoration: InputDecoration(
-                //     labelText: 'User *',
-                //     filled: true,
-                //     fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                //   ),
-                // ),
               ),
             )
           ],
@@ -111,20 +114,14 @@ class QuerryForm {
             Expanded(
               //  lbDays dropdown
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => _getOptionList('lbDays', filter),
+                asyncItems: (String? filter) => _getOptions('lbDays', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
                   showSearchBox: true,
                 ),
                 compareFn: (i, s) => i == s,
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'User *',
-                    filled: true,
-                    fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                  ),
-                ),
+                selectedItem: (await _getOptions('lbDays', null)).first,
               ),
             )
           ],
@@ -138,20 +135,14 @@ class QuerryForm {
             Expanded(
               //  dlPeriod dropdown
               child: DropdownSearch<TableOptionsItem>(
-                asyncItems: (String? filter) => _getOptionList('dlPeriod', filter),
+                asyncItems: (String? filter) => _getOptions('dlPeriod', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
                   showSearchBox: true,
                 ),
                 compareFn: (i, s) => i == s,
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'User *',
-                    filled: true,
-                    fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                  ),
-                ),
+                selectedItem: (await _getOptions('dlPeriod', null)).first,
               ),
             )
           ],
@@ -204,27 +195,6 @@ class QuerryForm {
         subtitle: Text(item.id),
       ),
     );
-  }
-
-  //  options retriver
-  Future<List<TableOptionsItem>> _getOptionList(String target, String? filter) async {
-    Map<String, List<TableOptionsItem>> options = await tb.getTableOptions();
-    if (options[target] != null) {
-      List<TableOptionsItem> item = options[target]!;
-      if (filter != null && filter.isNotEmpty) {
-        return item.where((element) => element.name.toLowerCase().contains(filter)).toList();
-      }
-      return item;
-    }
-    return [];
-  }
-
-  // Future<Map<String, List<TableOptionsItem>>> _getAllOptions() async {
-  //   return tb.getTableOptions();
-  // }
-
-  void _updateOptions() async {
-    _options = await tb.getTableOptions();
   }
 
   Future<List<TableOptionsItem>> _getOptions(String target, String? filter) async {
