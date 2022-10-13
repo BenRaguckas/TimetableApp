@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:timetable/timetable.dart';
 
 class ShowTable extends StatefulWidget {
-  final TimeTable tt;
+  final Future<TimeTable> tt;
   const ShowTable(this.tt, {Key? key}) : super(key: key);
 
   @override
@@ -17,7 +17,7 @@ class _ShowTable extends State<ShowTable> {
       appBar: AppBar(
         title: const Text('SHOW'),
       ),
-      body: Text(widget.tt.day[0].toString()),
+      body: Text('test'),
     );
   }
 }

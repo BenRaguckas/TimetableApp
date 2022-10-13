@@ -162,7 +162,7 @@ class QuerryForm {
               if (_formKey.currentState!.validate()) {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) {
-                    // return ShowTable();
+                    return ShowTable(_tb.querryTimetable({'test': 'test'}));
                   },
                 ));
               }
@@ -208,5 +208,9 @@ class QuerryForm {
       return itemList.where((element) => element.name.toLowerCase().contains(filter.toLowerCase())).toList();
     }
     return itemList;
+  }
+
+  Map<String, String> _formParams() {
+    return {};
   }
 }

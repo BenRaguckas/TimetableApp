@@ -36,6 +36,18 @@ class TimetableBrowser {
     }
   }
 
+  Future<TimeTable> querryTimetable(Map<String, String> params) async {
+    //  Make copy of _postBody
+    Map<String, String> querryBody = Map.from(_postBody);
+    //  Add params provided (dlOptions, dlDays, etc.)
+    querryBody.addAll(params);
+    //  Send post request
+    var response = await _postRequest(_baseUri + defaultUri, body: querryBody, cookies: _cookies);
+    //  Should capture some testing for valid response
+    var timetableresponse = await _getRequest(_baseUri + showUri, cookies: _cookies);
+    return _parseTable(timetableresponse);
+  }
+
   //  First request used to retrieve the base URI used for timetable
   Future<String> _getBaseUrl() async {
     // var response = await _client.get(Uri.parse(_originUri));
@@ -144,7 +156,7 @@ class TimetableBrowser {
   }
 
   //  Querry timetable
-  Future<bool> querryTimetable(Map<String, String> params) async {
+  Future<bool> _querryTimetable(Map<String, String> params) async {
     //  Add extra hardcoded variables (only one style of timetable available)
     _postBody['RadioType'] = 'TextSpreadsheet;swsurl;student+set+textspreadsheet';
     var response = await _postRequest(_baseUri + defaultUri, body: _postBody, cookies: _cookies);
@@ -160,7 +172,7 @@ class TimetableBrowser {
   }
 
   //  PLACEHOLDER
-  void _parseTable(http.Response response) {
+  TimeTable _parseTable(http.Response response) {
     var doc = html.parse(response.body);
     List<List<Subject>> allSubjects = [];
     String title = '';
@@ -191,6 +203,7 @@ class TimetableBrowser {
     TimeTable tb = TimeTable(title, allSubjects);
 
     print(tb);
+    return tb;
   }
 
   //  Maps options of given element by ID
