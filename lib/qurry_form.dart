@@ -12,8 +12,6 @@ class QuerryForm {
 
   Map<String, String> formInputs = {};
 
-  // final _messangerKey = GlobalKey<ScaffoldMessengerState>();
-
   //  Base consturctor
   QuerryForm(this._options, this._tb);
   //  Actual constructor
