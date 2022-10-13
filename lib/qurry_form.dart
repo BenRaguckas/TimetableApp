@@ -10,6 +10,8 @@ class QuerryForm {
 
   final TimetableBrowser _tb;
 
+  Map<String, String> formInputs = {};
+
   // final _messangerKey = GlobalKey<ScaffoldMessengerState>();
 
   //  Base consturctor
@@ -64,6 +66,7 @@ class QuerryForm {
             Expanded(
               //  dlOptions dropdown (subject selection)
               child: DropdownSearch<TableOptionsItem>(
+                onSaved: (newValue) => formInputs['dlObject'] = newValue!.id,
                 // asyncItems: (filter) => _getOptionList('dlObject', filter),
                 asyncItems: (filter) => _getOptions('dlObject', filter),
                 compareFn: (i, s) => i == s,
@@ -97,6 +100,7 @@ class QuerryForm {
             Expanded(
               //  lbWeeks dropdown
               child: DropdownSearch<TableOptionsItem>(
+                onSaved: (newValue) => formInputs['lbWeeks'] = newValue!.id,
                 asyncItems: (String? filter) => _getOptions('lbWeeks', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
@@ -118,6 +122,7 @@ class QuerryForm {
             Expanded(
               //  lbDays dropdown
               child: DropdownSearch<TableOptionsItem>(
+                onSaved: (newValue) => formInputs['lbDays'] = newValue!.id,
                 asyncItems: (String? filter) => _getOptions('lbDays', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
@@ -139,6 +144,7 @@ class QuerryForm {
             Expanded(
               //  dlPeriod dropdown
               child: DropdownSearch<TableOptionsItem>(
+                onSaved: (newValue) => formInputs['dlPeriod'] = newValue!.id,
                 asyncItems: (String? filter) => _getOptions('dlPeriod', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
@@ -160,9 +166,10 @@ class QuerryForm {
             onPressed: () {
               // Validate returns true if the form is valid, or false otherwise.
               if (_formKey.currentState!.validate()) {
+                _formKey.currentState?.save();
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) {
-                    return ShowTable(_tb.querryTimetable({'test': 'test'}));
+                    return ShowTable(_tb.querryTimetable(formInputs));
                   },
                 ));
               }
@@ -208,9 +215,5 @@ class QuerryForm {
       return itemList.where((element) => element.name.toLowerCase().contains(filter.toLowerCase())).toList();
     }
     return itemList;
-  }
-
-  Map<String, String> _formParams() {
-    return {};
   }
 }

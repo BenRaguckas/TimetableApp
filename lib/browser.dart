@@ -41,6 +41,7 @@ class TimetableBrowser {
     Map<String, String> querryBody = Map.from(_postBody);
     //  Add params provided (dlOptions, dlDays, etc.)
     querryBody.addAll(params);
+    querryBody['RadioType'] = 'TextSpreadsheet;swsurl;student+set+textspreadsheet';
     //  Send post request
     var response = await _postRequest(_baseUri + defaultUri, body: querryBody, cookies: _cookies);
     //  Should capture some testing for valid response

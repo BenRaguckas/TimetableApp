@@ -17,17 +17,17 @@ class _ShowTable extends State<ShowTable> {
       appBar: AppBar(
         title: const Text('SHOW'),
       ),
-      body: Text('test'),
+      body: FutureBuilder<String>(
+        future: widget.tt.then((value) => value.toString()),
+        builder: (context, snapshot) {
+          //  Loading screen instead of Container
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            return Text(snapshot.data!);
+          }
+        },
+      ),
     );
-  }
-}
-
-class StateTest extends StatelessWidget {
-  const StateTest({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
   }
 }
