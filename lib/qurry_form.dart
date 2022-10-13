@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:timetable/show_table.dart';
 import 'browser.dart';
 
 class QuerryForm {
@@ -7,14 +8,17 @@ class QuerryForm {
 
   final Map<String, List<TableOptionsItem>> _options;
 
-  final _messangerKey = GlobalKey<ScaffoldMessengerState>();
+  final TimetableBrowser _tb;
+
+  // final _messangerKey = GlobalKey<ScaffoldMessengerState>();
+
   //  Base consturctor
-  QuerryForm(this._options);
+  QuerryForm(this._options, this._tb);
   //  Actual constructor
   static Future<QuerryForm> create() async {
     TimetableBrowser tb = TimetableBrowser('https://timetable.ait.ie/');
     var options = await tb.getTableOptions();
-    return QuerryForm(options);
+    return QuerryForm(options, tb);
   }
 
   //  Try making async builder and include defaults
@@ -156,11 +160,11 @@ class QuerryForm {
             onPressed: () {
               // Validate returns true if the form is valid, or false otherwise.
               if (_formKey.currentState!.validate()) {
-                // If the form is valid, display a snackbar. In the real world,
-                // you'd often call a server or save the information in a database.
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Processing Data')),
-                );
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    // return ShowTable();
+                  },
+                ));
               }
             },
             child: const Text('Submit'),
