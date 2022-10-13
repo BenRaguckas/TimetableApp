@@ -1,24 +1,23 @@
-# Keeping this as refference and notes
+# Flutter app to streamline timetable viewing
 
-Working on UI implementation. Basic skeleton of a form is present but needs to be reworked into its own classes for easier maintenance. This is great example:
-https://docs.flutter.dev/cookbook/forms/validation
+This is primary driven by overwhelimgly tedious steps needed to view timetable from: timetable.ait.ie
 
+Due to its underlying functionality based on Scientia Ltd - 2.1.0 this app could work with other timetables with minimal adjustment needed (theoretically).
 
-Looking into default value for dropdown. Cant confirm but this could be answer:
-https://stackoverflow.com/questions/57869593/set-default-value-for-dropdown-button-in-flutter
-
-
-##  Plan
-Need to populate all the dropdowns (may need to exlude 1 or two).
-Tidy up leftovers from dropdown_search and form work.
-Need to add form submission. Need to add validation too (confirm that a subject is selected at least).
-Need to create a new "view" for displaying the timetable. For a placeholder a simple text display + debug will work.
-
-May need to return and update styling to be more convenient.
-
-Implement an options menu for setting favorite subject for easy search.
-Implement a save for actual timetable display.
-Implement some crude "editing". Likely with a comparison available.
+There is no current plan to implement testing but I will revise this idea once all the desired functionality is in place and working as expected.
 
 
-Maybe consider implementing some testing.
+
+*From original****README.md***
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
