@@ -9,7 +9,7 @@ There is no current plan to implement testing but I will revise this idea once a
 
 
 ## Getting Started
-*From original ****README.md***
+*From original* ***README.md***
 
 This project is a starting point for a Flutter application.
 
