@@ -17,3 +17,8 @@ Tidy up some of the code for easier work
 Get rid of redudant imports, etc.
 Adjust the timetable display window to be more "easy to use".
 Work on options menu as well as saving of TimeTable object.
+
+## 0.1.1
+Minor tidying
+**NOTE:** look into certain exception handling for easy feedback. Perhaps implement timeouts too for certain elements too.
+Basic skeleton implementation of PageView for TimeTable display

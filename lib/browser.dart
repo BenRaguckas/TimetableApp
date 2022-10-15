@@ -1,5 +1,4 @@
 import 'package:html/dom.dart';
-import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import 'package:quiver/core.dart';
@@ -156,22 +155,6 @@ class TimetableBrowser {
     return true;
   }
 
-  //  Querry timetable
-  Future<bool> _querryTimetable(Map<String, String> params) async {
-    //  Add extra hardcoded variables (only one style of timetable available)
-    _postBody['RadioType'] = 'TextSpreadsheet;swsurl;student+set+textspreadsheet';
-    var response = await _postRequest(_baseUri + defaultUri, body: _postBody, cookies: _cookies);
-    print(response.headers['content-length']);
-
-    //  get for timetable
-    var timetableresponse = await _getRequest(_baseUri + showUri, cookies: _cookies);
-    print(timetableresponse.headers['content-length']);
-
-    _parseTable(timetableresponse);
-
-    return true;
-  }
-
   //  PLACEHOLDER
   TimeTable _parseTable(http.Response response) {
     var doc = html.parse(response.body);
@@ -202,8 +185,6 @@ class TimetableBrowser {
       }
     });
     TimeTable tb = TimeTable(title, allSubjects);
-
-    print(tb);
     return tb;
   }
 
