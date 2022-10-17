@@ -1,7 +1,4 @@
-# Basic log for all changes pushed
-*Going to track most of changes that are pushed here.*
-
-## 0.1
+# 0.1
 **First point of refference for progression**
 Updated README.md + implemented this CHANGELOG.md
 
@@ -22,3 +19,7 @@ Work on options menu as well as saving of TimeTable object.
 Minor tidying
 **NOTE:** look into certain exception handling for easy feedback. Perhaps implement timeouts too for certain elements too.
 Basic skeleton implementation of PageView for TimeTable display
+
+# 0.2
+Some work towards tidying up the filestructure.
+Primarily moved all classes to their own files. Will need to re-assess views and if they would benefit from minor dividing.

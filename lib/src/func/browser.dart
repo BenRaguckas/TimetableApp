@@ -1,9 +1,9 @@
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
-import 'package:quiver/core.dart';
-import 'package:timetable/subject.dart';
-import 'package:timetable/timetable.dart';
+import 'package:timetable/src/model/subject.dart';
+import 'package:timetable/src/model/timetable.dart';
+import 'package:timetable/src/model/form_options_item.dart';
 
 class TimetableBrowser {
   //  HTTP client
@@ -17,7 +17,7 @@ class TimetableBrowser {
   late String _baseUri;
 
   //  Objects used for
-  Map<String, List<TableOptionsItem>>? _tableOptions;
+  Map<String, List<FormOptionItem>>? _tableOptions;
   late Map<String, String> _postBody;
   late String _cookies;
   int _cookiesTime = 0;
@@ -26,7 +26,7 @@ class TimetableBrowser {
   TimetableBrowser(this._originUri, {this.loginUri = 'login.aspx', this.defaultUri = 'default.aspx', this.showUri = 'showtimetable.aspx'});
 
   //  Get method for _tableOptions (querries if unavailable)
-  Future<Map<String, List<TableOptionsItem>>> getTableOptions() async {
+  Future<Map<String, List<FormOptionItem>>> getTableOptions() async {
     if (_tableOptions != null && _cookiesTime + 600000 > DateTime.now().millisecondsSinceEpoch) {
       return _tableOptions!;
     } else {
@@ -112,10 +112,10 @@ class TimetableBrowser {
     return formInputs;
   }
 
-  Future<Map<String, List<TableOptionsItem>>> _getTableOptions(String uri, Map<String, String> body, String cookies) async {
+  Future<Map<String, List<FormOptionItem>>> _getTableOptions(String uri, Map<String, String> body, String cookies) async {
     var response = await _postRequest(uri, body: body, cookies: cookies);
     var doc = html.parse(response.body);
-    Map<String, List<TableOptionsItem>> options = {};
+    Map<String, List<FormOptionItem>> options = {};
     //  Gather dlObject (used to get subject code);
     options['dlObject'] = _getSelectOptions(doc, 'dlObject');
     //  Gather dlFilter2 options (to filter by department)
@@ -189,10 +189,10 @@ class TimetableBrowser {
   }
 
   //  Maps options of given element by ID
-  List<TableOptionsItem> _getSelectOptions(Document doc, String elID) {
-    List<TableOptionsItem> optionsMap = [];
+  List<FormOptionItem> _getSelectOptions(Document doc, String elID) {
+    List<FormOptionItem> optionsMap = [];
     doc.getElementById(elID)?.getElementsByTagName('option').forEach((element) {
-      optionsMap.add(TableOptionsItem(element.attributes['value'].toString(), element.text)); //[element.attributes['value'].toString()] = element.text;
+      optionsMap.add(FormOptionItem(element.attributes['value'].toString(), element.text)); //[element.attributes['value'].toString()] = element.text;
     });
     return optionsMap;
   }
@@ -214,20 +214,4 @@ class TimetableBrowser {
     });
     return formInputs;
   }
-}
-
-class TableOptionsItem {
-  final String id;
-  final String name;
-
-  TableOptionsItem(this.id, this.name);
-
-  @override
-  bool operator ==(Object other) => other is TableOptionsItem && id == other.id;
-
-  @override
-  int get hashCode => hash2(id.hashCode, name.hashCode);
-
-  @override
-  String toString() => name;
 }

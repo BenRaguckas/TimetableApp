@@ -1,12 +1,13 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:timetable/show_table.dart';
-import 'browser.dart';
+import 'package:timetable/src/view/show_table.dart';
+import 'package:timetable/src/model/form_options_item.dart';
+import '../func/browser.dart';
 
 class QuerryForm {
   final _formKey = GlobalKey<FormState>();
 
-  final Map<String, List<TableOptionsItem>> _options;
+  final Map<String, List<FormOptionItem>> _options;
 
   final TimetableBrowser _tb;
 
@@ -36,7 +37,7 @@ class QuerryForm {
         //   children: [
         //     Expanded(
         //       //  dlFilter2 dropdown  (Needs tweaking to accomodate or drop)
-        //       child: DropdownSearch<TableOptionsItem>(
+        //       child: DropdownSearch<FormOptionItem>(
         //         asyncItems: (String? filter) => _getOptionList('dlFilter2', filter),
         //         popupProps: PopupPropsMultiSelection.modalBottomSheet(
         //           showSelectedItems: true,
@@ -63,7 +64,7 @@ class QuerryForm {
           children: [
             Expanded(
               //  dlOptions dropdown (subject selection)
-              child: DropdownSearch<TableOptionsItem>(
+              child: DropdownSearch<FormOptionItem>(
                 onSaved: (newValue) => formInputs['dlObject'] = newValue!.id,
                 // asyncItems: (filter) => _getOptionList('dlObject', filter),
                 asyncItems: (filter) => _getOptions('dlObject', filter),
@@ -97,7 +98,7 @@ class QuerryForm {
           children: [
             Expanded(
               //  lbWeeks dropdown
-              child: DropdownSearch<TableOptionsItem>(
+              child: DropdownSearch<FormOptionItem>(
                 onSaved: (newValue) => formInputs['lbWeeks'] = newValue!.id,
                 asyncItems: (String? filter) => _getOptions('lbWeeks', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
@@ -119,7 +120,7 @@ class QuerryForm {
           children: [
             Expanded(
               //  lbDays dropdown
-              child: DropdownSearch<TableOptionsItem>(
+              child: DropdownSearch<FormOptionItem>(
                 onSaved: (newValue) => formInputs['lbDays'] = newValue!.id,
                 asyncItems: (String? filter) => _getOptions('lbDays', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
@@ -141,7 +142,7 @@ class QuerryForm {
           children: [
             Expanded(
               //  dlPeriod dropdown
-              child: DropdownSearch<TableOptionsItem>(
+              child: DropdownSearch<FormOptionItem>(
                 onSaved: (newValue) => formInputs['dlPeriod'] = newValue!.id,
                 asyncItems: (String? filter) => _getOptions('dlPeriod', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
@@ -184,7 +185,7 @@ class QuerryForm {
   //  Options layout
   Widget _tableOptionBuilder(
     BuildContext context,
-    TableOptionsItem item,
+    FormOptionItem item,
     bool isSelected,
   ) {
     return Container(
@@ -206,9 +207,9 @@ class QuerryForm {
     );
   }
 
-  Future<List<TableOptionsItem>> _getOptions(String target, String? filter) async {
+  Future<List<FormOptionItem>> _getOptions(String target, String? filter) async {
     // _options ??= await _getAllOptions();
-    List<TableOptionsItem> itemList = _options[target]!;
+    List<FormOptionItem> itemList = _options[target]!;
     if (filter != null && filter.isNotEmpty) {
       return itemList.where((element) => element.name.toLowerCase().contains(filter.toLowerCase())).toList();
     }
