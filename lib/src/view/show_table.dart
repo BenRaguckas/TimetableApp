@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timetable/timetable.dart';
+import 'package:timetable/src/model/timetable.dart';
 
 class ShowTable extends StatefulWidget {
   final Future<TimeTable> tt;

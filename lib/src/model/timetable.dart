@@ -1,4 +1,4 @@
-import 'package:timetable/subject.dart';
+import 'package:timetable/src/model/subject.dart';
 
 class TimeTable {
   String title;
