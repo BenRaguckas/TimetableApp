@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:timetable/src/model/timetable.dart';
 
+import 'day_view.dart';
+
 class ShowTable extends StatefulWidget {
   final Future<TimeTable> tt;
   const ShowTable(this.tt, {Key? key}) : super(key: key);
@@ -16,7 +18,7 @@ class _ShowTable extends State<ShowTable> {
   final PageController _controller = PageController(
     initialPage: 0,
     //  Size of display (anything below 1.0 allows seeing side objects)
-    viewportFraction: 0.8,
+    viewportFraction: 0.95,
   );
 
   @override
@@ -51,6 +53,7 @@ class _ShowTable extends State<ShowTable> {
               controller: _controller,
               scrollDirection: Axis.horizontal,
               children: [
+                DayView(),
                 _dayDisplay(snapshot.data!.day[0].toString()),
                 _dayDisplay(snapshot.data!.day[1].toString()),
                 _dayDisplay(snapshot.data!.day[2].toString()),
