@@ -16,14 +16,9 @@ class TimetableApp extends StatefulWidget {
 }
 
 class _TimetableAppState extends State<TimetableApp> {
-  final PageController _controller = PageController(
-    initialPage: 0,
-    //  Size of display (anything below 1.0 allows seeing side objects)
-    // viewportFraction: 0.95,
-  );
-
   @override
   Widget build(BuildContext context) {
+    print(DateTime.now().weekday);
     return MaterialApp(
       home: Builder(
         builder: (context) => Scaffold(
@@ -31,18 +26,18 @@ class _TimetableAppState extends State<TimetableApp> {
             backgroundColor: Colors.amber,
             title: const Text("TimetableApp"),
           ),
-          body: DayView(),
-          // body: FutureBuilder<Form>(
-          //   future: QuerryForm.create().then((value) => value.querryForm(context)),
-          //   builder: (context, snapshot) {
-          //     //  Loading screen instead of Container
-          //     if (!snapshot.hasData) {
-          //       return const Center(child: CircularProgressIndicator());
-          //     } else {
-          //       return snapshot.data!;
-          //     }
-          //   },
-          // ),
+          // body: DayView(),
+          body: FutureBuilder<Form>(
+            future: QuerryForm.create().then((value) => value.querryForm(context)),
+            builder: (context, snapshot) {
+              //  Loading screen instead of Container
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return snapshot.data!;
+              }
+            },
+          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               print("button for saved tt");

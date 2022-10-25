@@ -20,6 +20,10 @@ class Subject implements Comparable<Subject> {
         staff = list[8].split(';'),
         groups = list[9].split(';');
 
+  bool clash(Subject other) {
+    return false;
+  }
+
   @override
   String toString() {
     return '${title.padLeft(35)}, $module, ${type.padLeft(8)}, $start - $finish, ${room.toString().padLeft(3)}, $staff';

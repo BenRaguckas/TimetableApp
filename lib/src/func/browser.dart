@@ -2,6 +2,8 @@ import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import 'package:timetable/src/model/subject.dart';
+import 'package:timetable/src/model/table_day.dart';
+import 'package:timetable/src/model/table_full.dart';
 import 'package:timetable/src/model/timetable.dart';
 import 'package:timetable/src/model/form_options_item.dart';
 
@@ -35,7 +37,7 @@ class TimetableBrowser {
     }
   }
 
-  Future<TimeTable> querryTimetable(Map<String, String> params) async {
+  Future<TableFull> querryTimetable(Map<String, String> params) async {
     //  Make copy of _postBody
     Map<String, String> querryBody = Map.from(_postBody);
     //  Add params provided (dlOptions, dlDays, etc.)
@@ -45,6 +47,7 @@ class TimetableBrowser {
     var response = await _postRequest(_baseUri + defaultUri, body: querryBody, cookies: _cookies);
     //  Should capture some testing for valid response
     var timetableresponse = await _getRequest(_baseUri + showUri, cookies: _cookies);
+
     return _parseTable(timetableresponse);
   }
 
@@ -156,36 +159,61 @@ class TimetableBrowser {
   }
 
   //  PLACEHOLDER
-  TimeTable _parseTable(http.Response response) {
+  TableFull _parseTable(http.Response response) {
     var doc = html.parse(response.body);
-    List<List<Subject>> allSubjects = [];
-    String title = '';
+    // List<List<Subject>> allSubjects = [];
+    // String title = '';
+
+    Map<String, TableDay> days = {};
     //  Catch every Body > table element (root elements to avoid table nestingness present)
-    doc.getElementsByTagName('body > table').asMap().forEach((key, value) {
-      //  Catch first table (heading)
-      if (key == 0) {
-        title = value.text.split(' ').first;
-        // print(value.text.trim());
-      } //  All the following tables with borders (should only be weekdays)
-      else if (value.attributes['border'] == '1') {
+    doc.getElementsByTagName('body > table').forEach((element) {
+      //  Process elements with border="1"
+      if (element.attributes['border'] == '1') {
         List<Subject> subjects = [];
-        //  Iterate through consecutive table_rows
-        value.getElementsByTagName('tr').asMap().forEach((key, value) {
+        //  Get every table row item
+        element.getElementsByTagName('tr').asMap().forEach((key, value) {
           //  Skip headers
           if (key != 0) {
             List<String> inputs = [];
+            //  get each table data item and add to list
             value.getElementsByTagName('td').forEach((element) {
               inputs.add(element.text);
             });
             subjects.add(Subject.fromList(inputs));
           }
         });
-        subjects.sort();
-        allSubjects.add(subjects);
+        String dayName = element.previousElementSibling!.text;
+        days[dayName] = TableDay.create(subjects);
       }
     });
-    TimeTable tb = TimeTable(title, allSubjects);
-    return tb;
+    return TableFull(days);
+
+    // //  Catch every Body > table element (root elements to avoid table nestingness present)
+    // doc.getElementsByTagName('body > table').asMap().forEach((key, value) {
+    //   //  Catch first table (heading)
+    //   if (key == 0) {
+    //     title = value.text.split(' ').first;
+    //     // print(value.text.trim());
+    //   } //  All the following tables with borders (should only be weekdays)
+    //   else if (value.attributes['border'] == '1') {
+    //     List<Subject> subjects = [];
+    //     //  Iterate through consecutive table_rows
+    //     value.getElementsByTagName('tr').asMap().forEach((key, value) {
+    //       //  Skip headers
+    //       if (key != 0) {
+    //         List<String> inputs = [];
+    //         value.getElementsByTagName('td').forEach((element) {
+    //           inputs.add(element.text);
+    //         });
+    //         subjects.add(Subject.fromList(inputs));
+    //       }
+    //     });
+    //     subjects.sort();
+    //     allSubjects.add(subjects);
+    //   }
+    // });
+    // TimeTable tb = TimeTable(title, allSubjects);
+    // return tb;
   }
 
   //  Maps options of given element by ID

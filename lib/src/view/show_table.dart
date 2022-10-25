@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/src/model/table_full.dart';
 import 'package:timetable/src/model/timetable.dart';
 
 import 'day_view.dart';
 
 class ShowTable extends StatefulWidget {
-  final Future<TimeTable> tt;
+  final Future<TableFull> tt;
   const ShowTable(this.tt, {Key? key}) : super(key: key);
 
   @override
@@ -33,7 +34,7 @@ class _ShowTable extends State<ShowTable> {
     return Scaffold(
       appBar: AppBar(
         title: FutureBuilder<String>(
-          future: widget.tt.then((value) => value.title.toString()),
+          future: widget.tt.then((value) => 'TEST'),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
@@ -43,7 +44,7 @@ class _ShowTable extends State<ShowTable> {
           },
         ),
       ),
-      body: FutureBuilder<TimeTable>(
+      body: FutureBuilder<TableFull>(
         future: widget.tt.then((value) => value),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -53,10 +54,10 @@ class _ShowTable extends State<ShowTable> {
               controller: _controller,
               scrollDirection: Axis.horizontal,
               children: [
-                DayView(),
-                _dayDisplay(snapshot.data!.day[0].toString()),
-                _dayDisplay(snapshot.data!.day[1].toString()),
-                _dayDisplay(snapshot.data!.day[2].toString()),
+                TableView(snapshot.data!),
+                _dayDisplay(snapshot.data!.days['Tuesday'].toString()),
+                // _dayDisplay(snapshot.data!.day[1].toString()),
+                // _dayDisplay(snapshot.data!.day[2].toString()),
               ],
             );
           }

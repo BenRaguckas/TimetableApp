@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/src/model/table_full.dart';
 
-class DayView extends StatelessWidget {
+class TableView extends StatelessWidget {
+  final TableFull table;
+
+  TableView(this.table, {super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: SingleChildScrollView(
         child: Container(
+          //  height should be determined by time querried
           height: 1500,
           child: columnGet(context),
         ),
@@ -14,9 +20,11 @@ class DayView extends StatelessWidget {
   }
 
   final PageController _controller = PageController(
-    initialPage: 0,
+    //  initial page (set to weekday)
+    initialPage: DateTime.now().weekday - 1,
+    // initialPage: 0,
     //  Size of display (anything below 1.0 allows seeing side objects)
-    viewportFraction: 0.95,
+    // viewportFraction: 0.95,
   );
 
   Widget columnGet(BuildContext context) {
@@ -64,7 +72,7 @@ class DayView extends StatelessWidget {
                     end: Alignment.bottomCenter,
                   ),
                 ),
-                child: const Text("1"),
+                child: Text(table.days['Monday'].toString()),
               ),
               //  2
               Container(
