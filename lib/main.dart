@@ -16,6 +16,12 @@ class TimetableApp extends StatefulWidget {
 }
 
 class _TimetableAppState extends State<TimetableApp> {
+  final PageController _controller = PageController(
+    initialPage: 0,
+    //  Size of display (anything below 1.0 allows seeing side objects)
+    // viewportFraction: 0.95,
+  );
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
