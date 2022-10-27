@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import 'package:timetable/src/model/subject.dart';
 import 'package:timetable/src/model/table_day.dart';
-import 'package:timetable/src/model/table_full.dart';
-import 'package:timetable/src/model/timetable.dart';
 import 'package:timetable/src/model/form_options_item.dart';
 
 class TimetableBrowser {
@@ -37,7 +35,8 @@ class TimetableBrowser {
     }
   }
 
-  Future<TableFull> querryTimetable(Map<String, String> params) async {
+  Future<Map<String, TableDay>> querryTimetable(Map<String, String> params) async {
+    // Future<TableFull> querryTimetable(Map<String, String> params) async {
     //  Make copy of _postBody
     Map<String, String> querryBody = Map.from(_postBody);
     //  Add params provided (dlOptions, dlDays, etc.)
@@ -159,10 +158,8 @@ class TimetableBrowser {
   }
 
   //  PLACEHOLDER
-  TableFull _parseTable(http.Response response) {
+  Map<String, TableDay> _parseTable(http.Response response) {
     var doc = html.parse(response.body);
-    // List<List<Subject>> allSubjects = [];
-    // String title = '';
 
     Map<String, TableDay> days = {};
     //  Catch every Body > table element (root elements to avoid table nestingness present)
@@ -183,44 +180,19 @@ class TimetableBrowser {
           }
         });
         String dayName = element.previousElementSibling!.text;
-        days[dayName] = TableDay.create(subjects);
+        days[dayName] = TableDay.create(subjects, dayName);
       }
     });
-    return TableFull(days);
-
-    // //  Catch every Body > table element (root elements to avoid table nestingness present)
-    // doc.getElementsByTagName('body > table').asMap().forEach((key, value) {
-    //   //  Catch first table (heading)
-    //   if (key == 0) {
-    //     title = value.text.split(' ').first;
-    //     // print(value.text.trim());
-    //   } //  All the following tables with borders (should only be weekdays)
-    //   else if (value.attributes['border'] == '1') {
-    //     List<Subject> subjects = [];
-    //     //  Iterate through consecutive table_rows
-    //     value.getElementsByTagName('tr').asMap().forEach((key, value) {
-    //       //  Skip headers
-    //       if (key != 0) {
-    //         List<String> inputs = [];
-    //         value.getElementsByTagName('td').forEach((element) {
-    //           inputs.add(element.text);
-    //         });
-    //         subjects.add(Subject.fromList(inputs));
-    //       }
-    //     });
-    //     subjects.sort();
-    //     allSubjects.add(subjects);
-    //   }
-    // });
-    // TimeTable tb = TimeTable(title, allSubjects);
-    // return tb;
+    return days;
   }
 
   //  Maps options of given element by ID
   List<FormOptionItem> _getSelectOptions(Document doc, String elID) {
     List<FormOptionItem> optionsMap = [];
     doc.getElementById(elID)?.getElementsByTagName('option').forEach((element) {
-      optionsMap.add(FormOptionItem(element.attributes['value'].toString(), element.text)); //[element.attributes['value'].toString()] = element.text;
+      String id = element.attributes['value'].toString();
+      String name = element.text;
+      optionsMap.add(FormOptionItem(id, name));
     });
     return optionsMap;
   }
@@ -241,5 +213,12 @@ class TimetableBrowser {
       }
     });
     return formInputs;
+  }
+
+  String trimName(String baseName, String trimParam) {
+    if (baseName.contains(trimParam.substring(0, 5))) {
+      return baseName.substring(baseName.indexOf(' '), baseName.length);
+    }
+    return baseName;
   }
 }

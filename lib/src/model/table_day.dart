@@ -2,10 +2,11 @@ import 'package:timetable/src/model/subject.dart';
 
 class TableDay {
   List<List<Subject>> allSubjects;
+  String dayName;
 
-  TableDay(this.allSubjects);
+  TableDay(this.allSubjects, this.dayName);
 
-  TableDay.create(List<Subject> subjects) : allSubjects = __processClashes(subjects);
+  TableDay.create(List<Subject> subjects, this.dayName) : allSubjects = __processClashes(subjects);
 
   //  Divide list into more lists depending on clashing timeslots
   static List<List<Subject>> __processClashes(List<Subject> subjects) {

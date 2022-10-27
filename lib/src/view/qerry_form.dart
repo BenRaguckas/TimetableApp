@@ -1,6 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:timetable/src/view/show_table.dart';
+import 'package:timetable/src/view/load_table.dart';
 import 'package:timetable/src/model/form_options_item.dart';
 import '../func/browser.dart';
 
@@ -12,6 +12,8 @@ class QuerryForm {
   final TimetableBrowser _tb;
 
   Map<String, String> formInputs = {};
+
+  Map<String, String> formOptions = {};
 
   //  Base consturctor
   QuerryForm(this._options, this._tb);
@@ -58,14 +60,17 @@ class QuerryForm {
         // ),
         //  Item 2 - dlOptions
         const Padding(padding: EdgeInsets.all(8)),
-        const Text("dlOptions"),
+        const Text("dlObject"),
         const Divider(),
         Row(
           children: [
             Expanded(
               //  dlOptions dropdown (subject selection)
               child: DropdownSearch<FormOptionItem>(
-                onSaved: (newValue) => formInputs['dlObject'] = newValue!.id,
+                onSaved: (newValue) {
+                  formInputs['dlObject'] = newValue!.id;
+                  formOptions['title'] = newValue.trimName();
+                },
                 // asyncItems: (filter) => _getOptionList('dlObject', filter),
                 asyncItems: (filter) => _getOptions('dlObject', filter),
                 compareFn: (i, s) => i == s,
@@ -78,7 +83,8 @@ class QuerryForm {
                   isFilterOnline: true,
                   showSelectedItems: true,
                   showSearchBox: true,
-                  itemBuilder: _tableOptionBuilder,
+                  // itemBuilder: _tableOptionBuilder,
+                  itemBuilder: (context, item, isSelected) => _tableOptionBuilder(context, item, isSelected, trimName: true),
                   favoriteItemProps: FavoriteItemProps(
                     showFavoriteItems: true,
                     favoriteItems: (us) {
@@ -126,7 +132,6 @@ class QuerryForm {
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
-                  showSearchBox: true,
                 ),
                 compareFn: (i, s) => i == s,
                 selectedItem: (await _getOptions('lbDays', null)).first,
@@ -143,12 +148,14 @@ class QuerryForm {
             Expanded(
               //  dlPeriod dropdown
               child: DropdownSearch<FormOptionItem>(
-                onSaved: (newValue) => formInputs['dlPeriod'] = newValue!.id,
+                onSaved: (newValue) {
+                  formInputs['dlPeriod'] = newValue!.id;
+                  formOptions['period'] = newValue.id;
+                },
                 asyncItems: (String? filter) => _getOptions('dlPeriod', filter),
                 popupProps: PopupPropsMultiSelection.modalBottomSheet(
                   showSelectedItems: true,
                   itemBuilder: _tableOptionBuilder,
-                  showSearchBox: true,
                 ),
                 compareFn: (i, s) => i == s,
                 selectedItem: (await _getOptions('dlPeriod', null)).first,
@@ -168,7 +175,7 @@ class QuerryForm {
                 _formKey.currentState?.save();
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) {
-                    return ShowTable(_tb.querryTimetable(formInputs));
+                    return ShowTable(_tb.querryTimetable(formInputs), formOptions);
                   },
                 ));
               }
@@ -186,8 +193,11 @@ class QuerryForm {
   Widget _tableOptionBuilder(
     BuildContext context,
     FormOptionItem item,
-    bool isSelected,
-  ) {
+    bool isSelected, {
+    bool trimName = false,
+  }) {
+    String name = item.name;
+    if (trimName) name = item.trimName();
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       //  This specifies the apperence of selected item
@@ -201,7 +211,7 @@ class QuerryForm {
       //  This specifies the apperance of each item
       child: ListTile(
         selected: isSelected,
-        title: Text(item.name),
+        title: Text(name),
         subtitle: Text(item.id),
       ),
     );

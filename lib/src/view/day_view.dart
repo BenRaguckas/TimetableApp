@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timetable/src/model/table_day.dart';
 import 'package:timetable/src/model/table_full.dart';
 
 class TableView extends StatelessWidget {
@@ -8,13 +9,11 @@ class TableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: SingleChildScrollView(
-        child: Container(
-          //  height should be determined by time querried
-          height: 1500,
-          child: columnGet(context),
-        ),
+    return SingleChildScrollView(
+      child: SizedBox(
+        //  height should be determined by time querried
+        height: 1500,
+        child: columnGet(context),
       ),
     );
   }
@@ -63,43 +62,36 @@ class TableView extends StatelessWidget {
           child: PageView(
             controller: _controller,
             scrollDirection: Axis.horizontal,
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.orange, Colors.red],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: Text(table.days['Monday'].toString()),
-              ),
-              //  2
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blue, Colors.purple],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: const Text("2"),
-              ),
-              // 3
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red, Colors.orange],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: const Text("3"),
-              ),
-            ],
+            children: _fullView(context, table),
           ),
         ),
       ],
     );
+  }
+
+  Widget _dayView(BuildContext context, TableDay content) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.orange, Colors.red],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Text(content.dayName),
+          Text(content.allSubjects.toString()),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _fullView(BuildContext context, TableFull table) {
+    List<Widget> days = [];
+    table.days.forEach((key, value) {
+      days.add(_dayView(context, table.days[key]!));
+    });
+    return days;
   }
 }

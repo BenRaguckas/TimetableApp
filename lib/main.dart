@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:timetable/src/view/day_view.dart';
 import 'package:timetable/src/view/qerry_form.dart';
 
 const List<String> list = ['1', '2', '3', '4'];
@@ -18,7 +17,6 @@ class TimetableApp extends StatefulWidget {
 class _TimetableAppState extends State<TimetableApp> {
   @override
   Widget build(BuildContext context) {
-    print(DateTime.now().weekday);
     return MaterialApp(
       home: Builder(
         builder: (context) => Scaffold(

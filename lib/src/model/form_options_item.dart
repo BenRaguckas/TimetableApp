@@ -1,4 +1,5 @@
 import 'package:quiver/core.dart';
+import 'dart:math' as math;
 
 class FormOptionItem {
   final String id;
@@ -14,4 +15,11 @@ class FormOptionItem {
 
   @override
   String toString() => name;
+
+  String trimName() {
+    if (name.contains(id.substring(0, math.min(5, id.length)))) {
+      return name.substring(name.indexOf(' '), name.length).trim();
+    }
+    return name;
+  }
 }
