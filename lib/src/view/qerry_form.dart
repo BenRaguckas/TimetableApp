@@ -31,34 +31,9 @@ class QuerryForm {
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: ListView(padding: const EdgeInsets.all(8), children: <Widget>[
-        //  Item 1 - dlFilter2
-        // const Padding(padding: EdgeInsets.all(8)),
-        // const Text("dlFilter2"),
-        // const Divider(),
-        // Row(
-        //   children: [
-        //     Expanded(
-        //       //  dlFilter2 dropdown  (Needs tweaking to accomodate or drop)
-        //       child: DropdownSearch<FormOptionItem>(
-        //         asyncItems: (String? filter) => _getOptionList('dlFilter2', filter),
-        //         popupProps: PopupPropsMultiSelection.modalBottomSheet(
-        //           showSelectedItems: true,
-        //           itemBuilder: _tableOptionBuilder,
-        //           showSearchBox: true,
-        //         ),
-        //         compareFn: (i, s) => i == s,
-        //         dropdownDecoratorProps: DropDownDecoratorProps(
-        //           dropdownSearchDecoration: InputDecoration(
-        //             labelText: 'User *',
-        //             filled: true,
-        //             fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-        //           ),
-        //         ),
-        //       ),
-        //     )
-        //   ],
-        // ),
-        //  Item 2 - dlOptions
+        //  ##################################################
+        //  dlObject - Subject selection
+        //  ##################################################
         const Padding(padding: EdgeInsets.all(8)),
         const Text("dlObject"),
         const Divider(),
@@ -96,7 +71,9 @@ class QuerryForm {
             )
           ],
         ),
-        //  Item 3 - lbWeeks
+        //  ##################################################
+        //  lbWeeks - Week selection (semester)
+        //  ##################################################
         const Padding(padding: EdgeInsets.all(8)),
         const Text("lbWeeks"),
         const Divider(),
@@ -118,7 +95,9 @@ class QuerryForm {
             )
           ],
         ),
-        //  Item 4 - lbDays
+        //  ##################################################
+        //  lbDays - Day selection (what days to show)
+        //  ##################################################
         const Padding(padding: EdgeInsets.all(8)),
         const Text("lbDays"),
         const Divider(),
@@ -163,7 +142,9 @@ class QuerryForm {
             )
           ],
         ),
-        //  Item 6 - Submit
+        //  ##################################################
+        //  SUbmit button
+        //  ##################################################
         const Padding(padding: EdgeInsets.all(8)),
         const Divider(),
         Padding(

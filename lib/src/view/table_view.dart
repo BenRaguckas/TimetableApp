@@ -21,15 +21,15 @@ class TableView extends StatelessWidget {
   final PageController _controller = PageController(
     //  initial page (set to weekday)
     initialPage: DateTime.now().weekday - 1,
-    // initialPage: 0,
     //  Size of display (anything below 1.0 allows seeing side objects)
-    // viewportFraction: 0.95,
+    // viewportFraction: 0.98,
   );
 
   Widget columnGet(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        //  Timeline
         Expanded(
           flex: 2,
           child: Container(
@@ -43,20 +43,7 @@ class TableView extends StatelessWidget {
             child: const Text("1"),
           ),
         ),
-        //  c2
-        // Expanded(
-        //   flex: 8,
-        //   child: Container(
-        //     decoration: const BoxDecoration(
-        //       gradient: LinearGradient(
-        //         colors: [Colors.orange, Colors.red],
-        //         begin: Alignment.topCenter,
-        //         end: Alignment.bottomCenter,
-        //       ),
-        //     ),
-        //     child: const Text("2"),
-        //   ),
-        // ),
+        //  Day list
         Expanded(
           flex: 8,
           child: PageView(
