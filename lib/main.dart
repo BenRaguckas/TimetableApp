@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timetable/src/view/qerry_form.dart';
 
-const List<String> list = ['1', '2', '3', '4'];
-
 void main() {
   runApp(const TimetableApp());
 }

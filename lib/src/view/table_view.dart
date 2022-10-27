@@ -7,6 +7,25 @@ class TableView extends StatelessWidget {
 
   TableView(this.table, {super.key});
 
+  //  TEST
+  GlobalKey gk = GlobalKey();
+  OverlayEntry? _overlayEntry;
+  final LayerLink _layerLink = LayerLink();
+
+  OverlayEntry _createOverlay(BuildContext context) {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: 200.0,
+        child: Container(
+          color: Colors.red,
+        ),
+      ),
+    );
+  }
+  //  TEST END
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

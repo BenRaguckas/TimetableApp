@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:timetable/src/model/table_full.dart';
+import 'package:timetable/src/view/table_view_ful.dart';
 
 import '../model/table_day.dart';
-import 'table_view.dart';
 
 class ShowTable extends StatefulWidget {
   final Future<Map<String, TableDay>> days;
@@ -29,7 +29,7 @@ class _ShowTable extends State<ShowTable> {
             return const Center(child: CircularProgressIndicator());
           } else {
             //  Build the table with specified data
-            return TableView(TableFull(snapshot.data!, widget.options));
+            return TableViewFull(TableFull(snapshot.data!, widget.options));
           }
         },
       ),
